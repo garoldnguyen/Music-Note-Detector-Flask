@@ -1,118 +1,251 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="app-container">
-    <header class="header">
-        <div class="header-content">
-            <h1 class="brand-gradient">Music Note Detector</h1>
+<a class="skip" href="#main">{{ t('skip') }}</a>
+
+<div class="page">
+    <!-- decorative sprites -->
+    <span class="deco deco-1" aria-hidden="true">{{ sprite('notes/eighth', 3) }}</span>
+    <span class="deco deco-2" aria-hidden="true">{{ sprite('notes/pair', 3) }}</span>
+
+    <header class="top wrap">
+        <div class="brand">
+            {{ sprite('brand/app-icon', 2) }}
+            <div>
+                <h1>{{ t('title') }}</h1>
+                <p class="lab">{{ t('tagline') }}</p>
+            </div>
         </div>
-        <button id="themeToggle" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
-            <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
-            <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-        </button>
+        <div class="tools">
+            <div class="langs" role="group" aria-label="{{ t('lang_label') }}">
+                <a class="sq{% if lang == 'en' %} on{% endif %}" href="/" hreflang="en" lang="en" data-lang
+                    {% if lang == 'en' %}aria-current="true"{% endif %}>EN</a>
+                <a class="sq{% if lang == 'vi' %} on{% endif %}" href="/vi/" hreflang="vi" lang="vi" data-lang
+                    {% if lang == 'vi' %}aria-current="true"{% endif %}>VI</a>
+            </div>
+            <button class="sq" id="themeBtn" type="button" aria-label="{{ t('theme_to_dark') }}"
+                data-to-dark="{{ t('theme_to_dark') }}" data-to-light="{{ t('theme_to_light') }}">
+                <span class="ico-sun">{{ sprite('ui/sun', 2) }}</span>
+                <span class="ico-moon">{{ sprite('ui/moon', 2) }}</span>
+            </button>
+        </div>
     </header>
 
-    <!-- Main Detector Panel (Centered) -->
-    <main class="card detector-card" style="max-width: 800px; margin: 0 auto;">
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('realtime')">Microphone</button>
-            <button class="tab-btn" onclick="switchTab('upload')">File Upload</button>
+    <main class="wrap" id="main" tabindex="-1">
+        <div class="tabs" role="tablist" aria-label="{{ t('tablist') }}">
+            <button class="tab on" role="tab" id="tab-mic" aria-controls="view-mic" aria-selected="true"
+                type="button">{{ t('tab_mic') }}</button>
+            <button class="tab" role="tab" id="tab-upload" aria-controls="view-upload" aria-selected="false"
+                tabindex="-1" type="button">{{ t('tab_upload') }}</button>
         </div>
 
-        <!-- Content: Real-time -->
-        <div id="realtime" class="tab-content" style="display: block; width: 100%;">
-            <div class="status-label" id="freqDisplay">Ready to listen</div>
+        <!-- ============ MICROPHONE ============ -->
+        <div id="view-mic" role="tabpanel" aria-labelledby="tab-mic" class="view">
+            <div class="grid">
+                <div class="col col-main">
+                    <section class="card" aria-labelledby="h-tuner">
+                        <h2 class="tag" id="h-tuner">{{ t('tag_tuner') }}</h2>
+                        <div class="row between">
+                            <span class="lab status"><i class="dot" id="dot"></i><span
+                                    id="statusText">{{ t('status_ready') }}</span></span>
+                            <span class="chip badge" id="badge" hidden></span>
+                        </div>
+                        <div class="note" id="noteBox" aria-hidden="true">
+                            <span class="note-name" id="noteName">—</span><span class="note-oct" id="noteOct"></span>
+                        </div>
+                        <div class="readout" aria-hidden="true">
+                            <span class="hz" id="hz">— Hz</span>
+                            <span class="cents" id="cents"></span>
+                        </div>
+                        <svg id="meter" class="meter" viewBox="0 0 460 40" role="img"
+                            aria-label="{{ t('meter_label') }}" shape-rendering="crispEdges"></svg>
+                        <div class="meter-labels lab" aria-hidden="true"><span>{{ t('meter_flat') }} -50</span><span>0</span><span>+50 {{ t('meter_sharp') }}</span></div>
+                        <div class="row conf">
+                            <span class="lab">{{ t('confidence') }}</span>
+                            <div class="bar" aria-hidden="true"><div class="fill" id="confBar"></div></div>
+                            <b id="confVal">0%</b>
+                        </div>
+                        <p class="sr" id="srNote" aria-live="polite"></p>
+                    </section>
 
-            <div class="note-display" id="noteDisplay">—</div>
-
-            <!-- Staff Removed as per user request -->
-            <!-- <div class="staff-container">
-                    <svg id="staffSvg" width="300" height="150"></svg>
-                </div> -->
-
-            <button id="startDetection" class="btn btn-pill">Start Detection</button>
-            <button id="stopDetection" class="btn btn-ghost" disabled
-                style="margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;">Reset</button>
-
-            <div class="confidence-bar-container">
-                <div class="confidence-fill" id="confidenceBar"></div>
-            </div>
-        </div>
-
-        <!-- Content: Upload -->
-        <div id="upload" class="tab-content" style="display: none; width: 100%;">
-            <div class="upload-area" id="dropZone" onclick="document.getElementById('audioFile').click()">
-                <div class="upload-icon">↓</div>
-                <p>Click or Drop Audio File</p>
-                <div style="margin-top: 1rem;">
-                    <p
-                        style="font-size: 0.7rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem;">
-                        📁 Supported Formats</p>
-                    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                        <span
-                            style="background: var(--bg-subtle); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border-color-subtle);">WAV</span>
-                        <span
-                            style="background: var(--bg-subtle); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border-color-subtle);">MP3</span>
-                        <span
-                            style="background: var(--bg-subtle); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border-color-subtle);">FLAC</span>
-                        <span
-                            style="background: var(--bg-subtle); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border-color-subtle);">M4A</span>
-                        <span
-                            style="background: var(--bg-subtle); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border-color-subtle);">OGG</span>
-                        <span
-                            style="background: var(--bg-subtle); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; color: var(--text-secondary); border: 1px solid var(--border-color-subtle);">WMA</span>
-                    </div>
+                    <section class="card" aria-labelledby="h-keys">
+                        <h2 class="tag" id="h-keys">{{ t('tag_keyboard') }}</h2>
+                        <p class="lab right">{{ t('keyboard_range') }}</p>
+                        <svg id="keys" class="keys" viewBox="0 0 588 112" role="group"
+                            aria-label="{{ t('keyboard_label') }}" shape-rendering="crispEdges"></svg>
+                        <p class="hint center" id="keyHint">{{ t('keyboard_hint') }}</p>
+                    </section>
                 </div>
-                <input type="file" id="audioFile" accept="audio/*,video/mp4,video/x-m4v" style="display: none">
-            </div>
-            <div id="fileInfo" style="margin-top: 1rem;"></div>
-            <button id="analyzeBtn" class="btn btn-pill" style="margin-top: 1rem; display: none;">Analyze
-                File</button>
 
-            <!-- Visualization Containers -->
-            <div id="visualizations" style="display: none; margin-top: 2rem;">
-                <div id="waveform" style="width: 100%; height: 250px; margin-bottom: 2rem;"></div>
-            </div>
+                <div class="col col-side">
+                    <section class="card" aria-labelledby="h-mic">
+                        <h2 class="tag" id="h-mic">{{ t('tag_microphone') }}</h2>
+                        <div class="mic-row">
+                            <div class="mic-tile" id="micTile" data-state="idle">
+                                {{ sprite('mic/idle', 2, 'mic-idle') }}
+                                {{ sprite('mic/listening', 2, 'mic-on') }}
+                                {{ sprite('mic/off', 2, 'mic-off') }}
+                            </div>
+                            <div>
+                                <div class="mic-title" id="micTitle">{{ t('status_ready') }}</div>
+                                <div class="mic-sub" id="micHint">{{ t('mic_hint_idle') }}</div>
+                            </div>
+                        </div>
+                        <svg id="level" class="level" viewBox="0 0 120 40" role="img" aria-label="{{ t('level') }}"
+                            shape-rendering="crispEdges"></svg>
+                        <div class="btns">
+                            <button class="btn p" id="startBtn" type="button">{{ t('btn_start') }}</button>
+                            <button class="btn" id="resetBtn" type="button">{{ t('btn_reset') }}</button>
+                        </div>
+                        <p class="msg" id="micMsg" role="alert" hidden></p>
+                    </section>
 
-            <div id="results"></div>
+                    <section class="card" aria-labelledby="h-recent">
+                        <h2 class="tag" id="h-recent">{{ t('tag_recent') }}</h2>
+                        <div class="chips" id="recent">
+                            <p class="empty">{{ sprite('notes/eighth', 2) }}<span>{{ t('recent_empty') }}</span></p>
+                        </div>
+                    </section>
+
+                    <section class="card settings" id="settings" aria-labelledby="h-set">
+                        <h2 class="tag" id="h-set">{{ t('tag_settings') }}</h2>
+                        <label class="field">{{ t('set_ref') }}
+                            <select id="refPitch">
+                                <option value="440">A4 = 440 Hz</option>
+                                <option value="432">A4 = 432 Hz</option>
+                            </select>
+                        </label>
+                        <label class="field">{{ t('set_sound') }}
+                            <select id="keySound">
+                                <option value="piano">{{ t('sound_piano') }}</option>
+                                <option value="pure">{{ t('sound_pure') }}</option>
+                            </select>
+                        </label>
+                        <label class="field stack">{{ t('set_sens') }}
+                            <input type="range" id="sens" min="0" max="100" value="60">
+                        </label>
+                        <p class="hint">{{ t('set_range') }}</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ FILE UPLOAD ============ -->
+        <div id="view-upload" role="tabpanel" aria-labelledby="tab-upload" class="view" hidden>
+            <div class="stack-lg">
+                <div class="grid grid-file">
+                    <section class="card file-card" aria-labelledby="h-file">
+                        <h2 class="tag" id="h-file">{{ t('tag_file') }}</h2>
+                        <label class="drop" id="dropZone" for="audioFile">
+                            {{ sprite('ui/upload', 2) }}
+                            <strong>{{ t('drop_title') }}</strong>
+                            <span class="hint">{{ t('drop_hint') }}</span>
+                        </label>
+                        <div class="fileinfo" id="fileInfo" hidden>
+                            <div class="file-tile">{{ sprite('ui/file-audio', 2) }}</div>
+                            <div class="file-meta">
+                                <strong id="fileName"></strong>
+                                <span id="fileMeta"></span>
+                                <label class="btn s" for="audioFile">{{ t('file_change') }}</label>
+                            </div>
+                        </div>
+                        <input class="sr" type="file" id="audioFile" accept="audio/*,video/mp4,video/x-m4v">
+                    </section>
+
+                    <section class="card" aria-labelledby="h-mode">
+                        <h2 class="tag" id="h-mode">{{ t('tag_mode') }}</h2>
+                        <div class="modes" role="radiogroup" aria-labelledby="h-mode">
+                            <label class="mode"><input class="sr" type="radio" name="mode" value="quick"><b>{{ t('mode_quick') }}</b><span>{{ t('mode_quick_d') }}</span></label>
+                            <label class="mode"><input class="sr" type="radio" name="mode" value="standard" checked><b>{{ t('mode_standard') }}</b><span>{{ t('mode_standard_d') }}</span></label>
+                            <label class="mode"><input class="sr" type="radio" name="mode" value="advanced"><b>{{ t('mode_advanced') }}</b><span>{{ t('mode_advanced_d') }}</span></label>
+                        </div>
+                        <button class="btn p wide" id="analyzeBtn" type="button" disabled>{{ t('btn_analyze') }}</button>
+                    </section>
+                </div>
+
+                <section class="card progress" id="progress" role="status" hidden>
+                    <div class="spin" aria-hidden="true">{{ sprite('ui/loading-1', 2, 'f1') }}{{ sprite('ui/loading-2', 2, 'f2') }}</div>
+                    <div class="grow">
+                        <div class="row between"><b>{{ t('analyzing') }}</b><b id="progVal"></b></div>
+                        <div class="bar"><div class="fill" id="progBar"></div></div>
+                    </div>
+                </section>
+
+                <div class="stack-lg" id="results" hidden>
+                    <div class="tiles">
+                        <div class="tile t-gold"><span class="lab">{{ t('sum_notes') }}</span><b id="sumNotes">0</b></div>
+                        <div class="tile t-mint"><span class="lab">{{ t('sum_range') }}</span><b id="sumRange">—</b></div>
+                        <div class="tile t-salmon"><span class="lab">{{ t('sum_common') }}</span><b id="sumCommon">—</b></div>
+                        <div class="tile"><span class="lab">{{ t('sum_conf') }}</span><b id="sumConf">—</b></div>
+                    </div>
+
+                    <section class="card" aria-labelledby="h-wave">
+                        <h2 class="tag" id="h-wave">{{ t('tag_wave') }}</h2>
+                        <div class="row end player">
+                            <button class="btn s p" id="playBtn" type="button">{{ sprite('ui/play', 1, 'ic-play') }}{{ sprite('ui/pause', 1, 'ic-pause') }}<span id="playText">{{ t('play') }}</span></button>
+                            <b id="timeText">0:00 / 0:00</b>
+                        </div>
+                        <p class="msg" id="playMsg" hidden>{{ t('no_playback') }}</p>
+                        <svg id="waveSvg" class="wave" viewBox="0 0 844 80" role="img" aria-label="{{ t('wave_label') }}"
+                            shape-rendering="crispEdges"></svg>
+                        <input class="sr" type="range" id="seek" min="0" max="1000" value="0" aria-label="{{ t('seek') }}">
+                        <div class="timeline">
+                            <div class="y-axis" id="yAxis" aria-hidden="true"></div>
+                            <svg id="timeSvg" class="time" viewBox="0 0 840 240" role="img"
+                                aria-label="{{ t('timeline_label') }}" shape-rendering="crispEdges"></svg>
+                        </div>
+                        <p class="hint" id="timeEmpty" hidden><span class="clef">{{ sprite('notes/clef', 1) }}</span>{{ t('timeline_empty') }}</p>
+                        <div class="legend" id="legend"></div>
+                    </section>
+
+                    <section class="card" aria-labelledby="h-res">
+                        <h2 class="tag" id="h-res">{{ t('tag_results') }}</h2>
+                        <div class="row between wrap-row">
+                            <label class="field stack">{{ t('search_label') }}
+                                <input type="search" id="search" placeholder="{{ t('search_ph') }}" autocomplete="off">
+                            </label>
+                            <div class="row pager">
+                                <button class="btn s" id="prevBtn" type="button">{{ t('prev') }}</button>
+                                <span id="pageInfo"></span>
+                                <button class="btn s" id="nextBtn" type="button">{{ t('next') }}</button>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr><th>{{ t('th_time') }}</th><th>{{ t('th_note') }}</th><th>{{ t('th_freq') }}</th><th>{{ t('th_cents') }}</th><th>{{ t('th_conf') }}</th></tr>
+                                </thead>
+                                <tbody id="rows"></tbody>
+                            </table>
+                        </div>
+                        <div class="row exports">
+                            <span class="lab">{{ t('export') }}</span>
+                            <button class="btn" type="button" data-export="csv">{{ sprite('ui/export-csv', 1) }}{{ t('exp_csv') }}</button>
+                            <button class="btn" type="button" data-export="excel">{{ sprite('ui/export-xls', 1) }}{{ t('exp_excel') }}</button>
+                            <button class="btn" type="button" data-export="txt">{{ sprite('ui/export-txt', 1) }}{{ t('exp_txt') }}</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <p class="footer-name">Nguyen Minh Quan</p>
-            <div class="footer-links">
-                <a href="https://www.facebook.com/koderqq/" target="_blank" class="footer-link">Facebook</a>
-                <span class="footer-divider">•</span>
-                <a href="https://www.linkedin.com/in/quanng47/" target="_blank" class="footer-link">LinkedIn</a>
-            </div>
+    <footer class="foot">
+        <div class="wrap row between wrap-row">
+            <span>{{ t('footer_made') }}</span>
+            <span class="links"><a href="https://www.facebook.com/koderqq/" target="_blank" rel="noopener">Facebook</a><a href="https://www.linkedin.com/in/quanng47/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/garoldnguyen" target="_blank" rel="noopener">GitHub</a></span>
         </div>
     </footer>
+
+    <!-- phone: bottom bar -->
+    <nav class="bottom" aria-label="{{ t('tablist') }}">
+        <button type="button" data-go="mic" class="on">{{ t('tab_mic') }}</button>
+        <button type="button" data-go="upload">{{ t('tab_upload') }}</button>
+        <button type="button" data-go="settings">{{ t('tag_settings') }}</button>
+    </nav>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+    <template id="alertIcon">{{ sprite('ui/alert', 2) }}</template>
+    <template id="checkIcon">{{ sprite('ui/check', 2) }}</template>
 </div>
-
-<script>
-    // Minimal Tab Logic
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-</script>
 {% endblock %}

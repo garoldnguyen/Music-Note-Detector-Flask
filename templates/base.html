@@ -1,37 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="{{ lang }}" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Music Note Detector{% endblock %}</title>
+    <title>{{ t('page_title') }}</title>
+    <meta name="description" content="{{ t('meta_description') }}">
+    <link rel="icon" type="image/png" href="{{ sprite_src('brand/app-icon') }}">
+    <link rel="alternate" hreflang="en" href="/">
+    <link rel="alternate" hreflang="vi" href="/vi/">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <!-- Theme before first paint: the saved choice, else the system setting -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('nd-theme');
+                var theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
-        rel="stylesheet">
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-    <!-- Plotly for visualizations -->
-    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-
-    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pixel.css') }}">
 </head>
 
 <body>
     {% block content %}{% endblock %}
 
-    <!-- JavaScript -->
-    <script src="{{ url_for('static', filename='js/staff_renderer.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    {% block extra_js %}{% endblock %}
+    <!-- The words the scripts need (data, not code) -->
+    <script type="application/json" id="i18n">{{ words_json|safe }}</script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
 </html>

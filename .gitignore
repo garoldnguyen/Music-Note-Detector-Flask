@@ -40,3 +40,5 @@ Thumbs.db
 
 # Fly.io
 .fly/
+# delivered sprite pack (copied into static/pixel/)
+Pixel-Studio-18-Sprites/

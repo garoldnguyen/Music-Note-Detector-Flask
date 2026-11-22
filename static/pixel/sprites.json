@@ -1,0 +1,22 @@
+{
+  "brand/app-icon": [32, 32],
+  "mic/idle": [32, 32],
+  "mic/listening": [32, 32],
+  "mic/off": [32, 32],
+  "notes/eighth": [16, 16],
+  "notes/pair": [16, 16],
+  "notes/clef": [16, 24],
+  "ui/upload": [32, 32],
+  "ui/file-audio": [32, 32],
+  "ui/play": [16, 16],
+  "ui/pause": [16, 16],
+  "ui/export-csv": [16, 16],
+  "ui/export-xls": [16, 16],
+  "ui/export-txt": [16, 16],
+  "ui/check": [16, 16],
+  "ui/alert": [16, 16],
+  "ui/loading-1": [16, 16],
+  "ui/loading-2": [16, 16],
+  "ui/sun": [16, 16],
+  "ui/moon": [16, 16]
+}

@@ -54,3 +54,5 @@ README.md
 
 # Fly.io deployment files (already copied)
 fly.toml
+# delivered sprite pack (the sprites themselves live in static/pixel/)
+Pixel-Studio-18-Sprites/
